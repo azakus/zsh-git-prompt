@@ -17,6 +17,7 @@ error_string = error.decode('utf-8')
 if 'fatal: Not a git repository' in error_string:
 	sys.exit(0)
 
+branch = branch.decode('utf-8')
 branch = branch.strip()[11:]
 
 res, err = Popen(['git','diff','--name-status'], stdout=PIPE, stderr=PIPE).communicate()
@@ -41,19 +42,19 @@ else:
 remote = ''
 
 if not branch: # not on any branch
-	branch = symbols['prehash']+ Popen(['git','rev-parse','--short','HEAD'], stdout=PIPE).communicate()[0][:-1]
+	branch = symbols['prehash']+ Popen(['git','rev-parse','--short','HEAD'], stdout=PIPE).communicate()[0].decode('utf-8')[:-1]
 else:
-	remote_name = Popen(['git','config','branch.%s.remote' % branch], stdout=PIPE).communicate()[0].strip()
+	remote_name = Popen(['git','config','branch.%s.remote' % branch], stdout=PIPE).communicate()[0].decode('utf-8').strip()
 	if remote_name:
-		merge_name = Popen(['git','config','branch.%s.merge' % branch], stdout=PIPE).communicate()[0].strip()
+		merge_name = Popen(['git','config','branch.%s.merge' % branch], stdout=PIPE).communicate()[0].decode('utf-8').strip()
 		if remote_name == '.': # local
 			remote_ref = merge_name
 		else:
 			remote_ref = 'refs/remotes/%s/%s' % (remote_name, merge_name[11:])
 		revgit = Popen(['git', 'rev-list', '--left-right', '%s...HEAD' % remote_ref],stdout=PIPE, stderr=PIPE)
-		revlist = revgit.communicate()[0]
+		revlist = revgit.communicate()[0].decode('utf-8')
 		if revgit.poll(): # fallback to local
-			revlist = Popen(['git', 'rev-list', '--left-right', '%s...HEAD' % merge_name],stdout=PIPE, stderr=PIPE).communicate()[0]
+			revlist = Popen(['git', 'rev-list', '--left-right', '%s...HEAD' % merge_name],stdout=PIPE, stderr=PIPE).communicate()[0].decode('utf-8')
 		behead = revlist.splitlines()
 		ahead = len([x for x in behead if x[0]=='>'])
 		behind = len(behead) - ahead
